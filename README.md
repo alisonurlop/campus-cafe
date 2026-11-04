@@ -21,7 +21,9 @@ Aplicación web.
 Entorno y base de datos preparados. La conexión aplicación-BD se demuestra con la ruta técnica `/estado-bd/`, que consulta el número de alumnos y productos registrados. Los casos de uso se construirán en E2.
 
 ## Instalación y ejecución
-1. Clonar el repositorio y entrar a la carpeta del proyecto.
+1. Clonar el repositorio y entrar a la carpeta del proyecto:
+git clone https://github.com/TUUSUARIO/campus-cafe.git 
+cd campus-cafe
 2. Crear y activar el entorno virtual (Windows):
    `python -m venv venv` y luego `venv\Scripts\activate`
 3. Instalar dependencias: `pip install -r requirements.txt`
