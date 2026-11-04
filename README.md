@@ -22,8 +22,8 @@ Entorno y base de datos preparados. La conexión aplicación-BD se demuestra con
 
 ## Instalación y ejecución
 1. Clonar el repositorio y entrar a la carpeta del proyecto:
-git clone https://github.com/TUUSUARIO/campus-cafe.git 
-cd campus-cafe
+`git clone https://github.com/TUUSUARIO/campus-cafe.git` y luego 
+`cd campus-cafe`
 2. Crear y activar el entorno virtual (Windows):
    `python -m venv venv` y luego `venv\Scripts\activate`
 3. Instalar dependencias: `pip install -r requirements.txt`
