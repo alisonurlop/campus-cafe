@@ -4,5 +4,3 @@ __pycache__/
 *.pyc
 db.sqlite3
 .vscode/
-
-<!-- Esto hace que la contraseña y el entorno virtual nunca se suban a GitHub. -->
