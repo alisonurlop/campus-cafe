@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="20">
+<title>Campus Café · Cocina</title>
+<style>
+  * { box-sizing:border-box; }
+  body { margin:0; background:#E6E6FA; font-family:"Segoe UI", Arial, sans-serif; color:#6b4f8f; }
+  .top { display:flex; justify-content:space-between; align-items:center; padding:14px 28px; }
+  .top form { display:inline; }
+  .top button { background:none; border:0; color:#6b4f8f; text-decoration:underline; cursor:pointer; font-size:14px; }
+  main { padding:0 28px 28px; }
+  h2 { margin:0 0 4px; font-size:28px; }
+  .sub { color:#9a88b8; margin:0 0 18px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px; }
+  .pedido { background:#fff; border-radius:20px; padding:20px; box-shadow:0 8px 24px rgba(107,79,143,.12); }
+  .pedido h3 { margin:0 0 4px; }
+  .meta { color:#9a88b8; font-size:13px; margin-bottom:12px; }
+  .badge { display:inline-block; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:700; margin-bottom:10px; }
+  .Pendiente { background:#FFE4E1; color:#a33; }
+  .Listo { background:#d9ffe0; color:#245c33; }
+  ul { padding-left:18px; margin:0 0 14px; }
+  .btn { width:100%; padding:14px; border:0; border-radius:14px; font-size:15px; font-weight:800; cursor:pointer; background:#98FF98; color:#245c33; }
+  .msg { padding:12px; border-radius:12px; margin-bottom:14px; font-size:14px; }
+  .msg.success { background:#d9ffe0; color:#245c33; }
+  .msg.error { background:#ffe4e1; color:#a33; }
+  .vacio { background:#fff; border-radius:20px; padding:40px; text-align:center; color:#b4a6cc; }
+</style>
+</head>
+<body>
+<div class="top">
+  <strong>Campus Café · Cocina ({{ request.user.username }})</strong>
+  <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit">Cerrar sesión</button></form>
+</div>
+<main>
+  <h2>Órdenes de cocina</h2>
+  <p class="sub">Se actualiza sola cada 20 segundos.</p>
+
+  {% for m in messages %}<div class="msg {{ m.tags }}">{{ m }}</div>{% endfor %}
+
+  <div class="grid">
+    {% for p in pedidos %}
+    <div class="pedido">
+      <h3>Pedido #{{ p.id }}</h3>
+      <div class="meta">{{ p.alumno.nombre }} · {{ p.fecha_hora|time:"H:i" }}</div>
+      <span class="badge {{ p.estatus }}">{{ p.estatus }}</span>
+      <ul>
+        {% for d in p.detalles.all %}<li>{{ d.cantidad }} × {{ d.producto.nombre }}</li>{% endfor %}
+      </ul>
+      <form method="post" action="{% url 'avanzar' p.id %}">
+        {% csrf_token %}
+        <button class="btn" type="submit">
+          {% if p.estatus == "Pendiente" %}Listo para entregar{% else %}Marcar como entregado{% endif %}
+        </button>
+      </form>
+    </div>
+    {% empty %}
+    <div class="vacio" style="grid-column:1/-1;">No hay órdenes pendientes.</div>
+    {% endfor %}
+  </div>
+</main>
+</body>
+</html>
