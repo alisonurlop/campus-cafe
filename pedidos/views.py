@@ -78,6 +78,10 @@ def agregar(request, producto_id):
     if _cajero(request.user) is None:
         return HttpResponseForbidden("Este usuario no es Cajero.")
     producto = get_object_or_404(Producto, id=producto_id)
+    # Un producto agotado (marcado por cocina) no se puede vender.
+    if not producto.disponible:
+        messages.error(request, f"Error: {producto.nombre} está agotado y no se puede agregar.")
+        return redirect("caja")
     carrito = request.session.get("carrito", {})
     carrito[str(producto.id)] = carrito.get(str(producto.id), 0) + 1
     request.session["carrito"] = carrito
@@ -102,6 +106,17 @@ def cobrar(request):
     lineas, total = _lineas(request)
     if not lineas:
         messages.error(request, "Error: agregue al menos un producto antes de cobrar.")
+        return redirect("caja")
+
+    # Si cocina agoto un producto despues de agregarlo al ticket, se quita y no se cobra.
+    agotados = [l["producto"] for l in lineas if not l["producto"].disponible]
+    if agotados:
+        carrito = request.session.get("carrito", {})
+        for producto in agotados:
+            carrito.pop(str(producto.id), None)
+        request.session["carrito"] = carrito
+        nombres = ", ".join(p.nombre for p in agotados)
+        messages.error(request, f"Error: se agotó {nombres}. Se quitó del ticket; revise la orden.")
         return redirect("caja")
 
     matricula = request.POST.get("matricula", "").strip()
@@ -138,7 +153,10 @@ def cocina(request):
         .prefetch_related("detalles__producto")
         .order_by("fecha_hora")
     )
-    return render(request, "pedidos/cocina.html", {"pedidos": pedidos})
+    return render(request, "pedidos/cocina.html", {
+        "pedidos": pedidos,
+        "productos": Producto.objects.order_by("nombre"),
+    })
 
 @login_required
 @require_POST
@@ -170,6 +188,22 @@ def incidencia(request, pedido_id):
         return redirect("cocina")
     Incidencia.objects.update_or_create(pedido=pedido, defaults={"descripcion": descripcion})
     messages.success(request, f"Incidencia registrada en el pedido #{pedido.id}. Se avisó al cajero.")
+    return redirect("cocina")
+
+
+@login_required
+@require_POST
+def disponibilidad(request, producto_id):
+    """CU-05: el cocinero marca un producto como agotado o vuelve a ponerlo disponible."""
+    if _cocinero(request.user) is None:
+        return HttpResponseForbidden("Este usuario no es Cocinero.")
+    producto = get_object_or_404(Producto, id=producto_id)
+    producto.disponible = not producto.disponible
+    producto.save()
+    if producto.disponible:
+        messages.success(request, f"{producto.nombre} volvió a estar disponible en caja.")
+    else:
+        messages.success(request, f"{producto.nombre} marcado como agotado. Caja ya no puede venderlo.")
     return redirect("cocina")
 
 # ---------- CU-04 Consultar estado del pedido (Estudiante) ----------

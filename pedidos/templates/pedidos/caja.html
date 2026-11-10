@@ -19,7 +19,10 @@
   .grid form { margin:0; }
   .prod { width:100%; display:flex; justify-content:space-between; align-items:center; padding:20px; background:#FFE4E1; border:0; border-radius:18px; font-size:17px; font-weight:700; color:#6b4f8f; cursor:pointer; }
   .prod:hover { filter:brightness(.97); }
+  .prod.agotado { background:#ececf1; color:#a7a2b3; cursor:not-allowed; text-decoration:line-through; }
+  .prod.agotado:hover { filter:none; }
   .precio { background:#fff; padding:6px 12px; border-radius:999px; font-size:14px; }
+  .prod.agotado .precio { text-decoration:none; color:#a33; }
   .label { letter-spacing:.12em; font-size:12px; font-weight:700; color:#9a88b8; }
   input[type=text] { width:100%; padding:14px; margin:6px 0 16px; border:0; border-radius:14px; font-size:16px; background:#fff; }
   .lineas { background:#fff; border-radius:18px; padding:14px; min-height:140px; margin-bottom:16px; }
@@ -51,10 +54,16 @@
     {% if not productos %}<p class="sub">No hay productos. Agrégalos desde el administrador.</p>{% endif %}
     <div class="grid">
       {% for p in productos %}
-      <form method="post" action="{% url 'agregar' p.id %}">
-        {% csrf_token %}
-        <button class="prod" type="submit"><span>{{ p.nombre }}</span><span class="precio">${{ p.precio }}</span></button>
-      </form>
+        {% if p.disponible %}
+        <form method="post" action="{% url 'agregar' p.id %}">
+          {% csrf_token %}
+          <button class="prod" type="submit"><span>{{ p.nombre }}</span><span class="precio">${{ p.precio }}</span></button>
+        </form>
+        {% else %}
+        <div>
+          <button class="prod agotado" type="button" disabled><span>{{ p.nombre }}</span><span class="precio">Agotado</span></button>
+        </div>
+        {% endif %}
       {% endfor %}
     </div>
   </section>
