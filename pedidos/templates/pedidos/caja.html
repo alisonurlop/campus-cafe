@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campus Café · Caja</title>
+<style>
+  * { box-sizing:border-box; }
+  body { margin:0; background:#E6E6FA; font-family:"Segoe UI", Arial, sans-serif; color:#6b4f8f; }
+  .top { display:flex; justify-content:space-between; align-items:center; padding:14px 28px; }
+  .top form { display:inline; }
+  .top button { background:none; border:0; color:#6b4f8f; text-decoration:underline; cursor:pointer; font-size:14px; }
+  .layout { display:grid; grid-template-columns: 1.4fr 1fr; gap:0; margin:0 28px 28px; background:#fafaff; border-radius:28px; overflow:hidden; box-shadow:0 8px 24px rgba(107,79,143,.15); }
+  .catalogo { padding:28px; }
+  .ticket { padding:28px; background:#eaf0ff; }
+  h2 { margin:0 0 4px; font-size:28px; }
+  .sub { color:#9a88b8; margin:0 0 18px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid form { margin:0; }
+  .prod { width:100%; display:flex; justify-content:space-between; align-items:center; padding:20px; background:#FFE4E1; border:0; border-radius:18px; font-size:17px; font-weight:700; color:#6b4f8f; cursor:pointer; }
+  .prod:hover { filter:brightness(.97); }
+  .precio { background:#fff; padding:6px 12px; border-radius:999px; font-size:14px; }
+  .label { letter-spacing:.12em; font-size:12px; font-weight:700; color:#9a88b8; }
+  input[type=text] { width:100%; padding:14px; margin:6px 0 16px; border:0; border-radius:14px; font-size:16px; background:#fff; }
+  .lineas { background:#fff; border-radius:18px; padding:14px; min-height:140px; margin-bottom:16px; }
+  .linea { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #f0eaf7; }
+  .vacio { text-align:center; color:#b4a6cc; padding-top:48px; }
+  .total { display:flex; justify-content:space-between; background:#fff; padding:16px 20px; border-radius:16px; font-size:22px; font-weight:800; margin-bottom:14px; }
+  .msg { padding:12px; border-radius:12px; margin-bottom:14px; font-size:14px; }
+  .msg.success { background:#d9ffe0; color:#245c33; }
+  .msg.error { background:#ffe4e1; color:#a33; }
+  .msg.info { background:#fff; color:#6b4f8f; }
+  .botones { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .botones form { margin:0; }
+  .btn { width:100%; padding:16px; border:0; border-radius:14px; font-size:16px; font-weight:800; cursor:pointer; }
+  .cancelar { background:#f7b6c2; color:#7a2d3d; }
+  .cobrar { background:#98FF98; color:#245c33; }
+  @media (max-width:800px) { .layout { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="top">
+  <strong>Campus Café · Caja ({{ request.user.username }})</strong>
+  <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit">Cerrar sesión</button></form>
+</div>
+
+<div class="layout">
+  <section class="catalogo">
+    <h2>Catálogo de productos</h2>
+    <p class="sub">Selecciona un producto para agregarlo.</p>
+    {% if not productos %}<p class="sub">No hay productos. Agrégalos desde el administrador.</p>{% endif %}
+    <div class="grid">
+      {% for p in productos %}
+      <form method="post" action="{% url 'agregar' p.id %}">
+        {% csrf_token %}
+        <button class="prod" type="submit"><span>{{ p.nombre }}</span><span class="precio">${{ p.precio }}</span></button>
+      </form>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="ticket">
+    <div class="label">PEDIDO ACTUAL</div>
+    <h2>Ticket activo</h2>
+
+    {% for m in messages %}<div class="msg {{ m.tags }}">{{ m }}</div>{% endfor %}
+
+    <form method="post" action="{% url 'cobrar' %}" id="form-cobrar">
+      {% csrf_token %}
+      <label class="label" for="matricula">MATRÍCULA DEL ALUMNO</label>
+      <input type="text" id="matricula" name="matricula" placeholder="Ej. A000001" autocomplete="off">
+    </form>
+
+    <div class="lineas">
+      {% for l in lineas %}
+        <div class="linea"><span>{{ l.cantidad }} × {{ l.producto.nombre }}</span><span>${{ l.subtotal }}</span></div>
+      {% empty %}
+        <div class="vacio">No hay productos agregados.</div>
+      {% endfor %}
+    </div>
+
+    <div class="total"><span>Total</span><span>${{ total }}</span></div>
+
+    <div class="botones">
+      <form method="post" action="{% url 'cancelar' %}">{% csrf_token %}<button class="btn cancelar" type="submit">Cancelar orden</button></form>
+      <button class="btn cobrar" type="submit" form="form-cobrar">Cobrar y Transmitir</button>
+    </div>
+  </section>
+</div>
+</body>
+</html>
