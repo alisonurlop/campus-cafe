@@ -64,6 +64,11 @@
     <h2>Ticket activo</h2>
 
     {% for m in messages %}<div class="msg {{ m.tags }}">{{ m }}</div>{% endfor %}
+        {% for a in alertas %}
+      <div style="background:#fff3cd;color:#7a5b00;padding:12px;border-radius:12px;margin-bottom:14px;font-size:14px;">
+        ⚠ Pedido #{{ a.pedido.id }} ({{ a.pedido.alumno.nombre }}): {{ a.descripcion }}. Avise al alumno y ofrezca un cambio o reembolso.
+      </div>
+    {% endfor %}
 
     <form method="post" action="{% url 'cobrar' %}" id="form-cobrar">
       {% csrf_token %}

@@ -14,4 +14,5 @@ urlpatterns = [
     path("estado/", views.estado, name="estado"),
     path("login/", auth_views.LoginView.as_view(template_name="pedidos/login.html"), name="login"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+        path("pedido/<int:pedido_id>/incidencia/", views.incidencia, name="incidencia"),
 ]

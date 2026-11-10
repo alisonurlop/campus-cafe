@@ -11,7 +11,7 @@ from alumnos.models import Alumno
 from catalogo.models import Producto
 from empleados.models import Empleado
 
-from .models import DetallePedido, Pedido
+from .models import DetallePedido, Incidencia, Pedido
 
 
 def _cajero(user):
@@ -63,10 +63,12 @@ def caja(request):
     if _cajero(request.user) is None:
         return HttpResponseForbidden("Este usuario no es Cajero.")
     lineas, total = _lineas(request)
+    alertas = Incidencia.objects.filter(pedido__estatus="Pendiente").select_related("pedido__alumno")
     return render(request, "pedidos/caja.html", {
         "productos": Producto.objects.order_by("nombre"),
         "lineas": lineas,
         "total": total,
+        "alertas": alertas,
     })
 
 
@@ -132,12 +134,11 @@ def cocina(request):
         return HttpResponseForbidden("Este usuario no es Cocinero.")
     pedidos = (
         Pedido.objects.filter(estatus__in=["Pendiente", "Listo"])
-        .select_related("alumno")
+        .select_related("alumno", "incidencia")
         .prefetch_related("detalles__producto")
         .order_by("fecha_hora")
     )
     return render(request, "pedidos/cocina.html", {"pedidos": pedidos})
-
 
 @login_required
 @require_POST
@@ -155,6 +156,21 @@ def avanzar(request, pedido_id):
     messages.success(request, f"Pedido #{pedido.id} marcado como {pedido.estatus}.")
     return redirect("cocina")
 
+#------------CU-05 Registrar incidencia (RF-09)-------------------
+@login_required
+@require_POST
+def incidencia(request, pedido_id):
+    """CU-05: el cocinero reporta un problema (por ejemplo, falta de insumos)."""
+    if _cocinero(request.user) is None:
+        return HttpResponseForbidden("Este usuario no es Cocinero.")
+    pedido = get_object_or_404(Pedido, id=pedido_id, estatus="Pendiente")
+    descripcion = request.POST.get("descripcion", "").strip()
+    if not descripcion:
+        messages.error(request, "Error: describa qué insumo falta.")
+        return redirect("cocina")
+    Incidencia.objects.update_or_create(pedido=pedido, defaults={"descripcion": descripcion})
+    messages.success(request, f"Incidencia registrada en el pedido #{pedido.id}. Se avisó al cajero.")
+    return redirect("cocina")
 
 # ---------- CU-04 Consultar estado del pedido (Estudiante) ----------
 

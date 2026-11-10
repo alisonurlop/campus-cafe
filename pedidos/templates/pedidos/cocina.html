@@ -49,6 +49,18 @@
       <ul>
         {% for d in p.detalles.all %}<li>{{ d.cantidad }} × {{ d.producto.nombre }}</li>{% endfor %}
       </ul>
+            {% if p.incidencia %}
+        <div style="background:#fff3cd;color:#7a5b00;padding:10px;border-radius:12px;margin-bottom:12px;font-size:14px;">
+          ⚠ Incidencia: {{ p.incidencia.descripcion }}
+        </div>
+      {% endif %}
+      {% if p.estatus == "Pendiente" %}
+      <form method="post" action="{% url 'incidencia' p.id %}" style="margin-bottom:10px;">
+        {% csrf_token %}
+        <input type="text" name="descripcion" placeholder="Ej. Falta pan" style="width:100%;padding:10px;border:1px solid #d9cdee;border-radius:10px;margin-bottom:6px;">
+        <button type="submit" style="width:100%;padding:10px;border:0;border-radius:10px;background:#f7b6c2;color:#7a2d3d;font-weight:700;cursor:pointer;">Registrar incidencia</button>
+      </form>
+      {% endif %}
       <form method="post" action="{% url 'avanzar' p.id %}">
         {% csrf_token %}
         <button class="btn" type="submit">
