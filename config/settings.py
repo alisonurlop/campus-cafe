@@ -115,7 +115,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Mexico_City'
 
 USE_I18N = True
 
@@ -137,5 +137,5 @@ MAILERS = {
     },
 }
 LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "caja"
+LOGIN_REDIRECT_URL = "inicio"
 LOGOUT_REDIRECT_URL = "login"
