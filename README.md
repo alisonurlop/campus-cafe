@@ -10,8 +10,6 @@ Gestionar la captura, cobro, preparación y entrega de pedidos de alimentos, evi
 
 Equipo 15: Alison Astrid Uribe López y Emiliano Covarrubias Toledo.
 
-Nota: la construcción y documentación de E1 y E2 fue realizada por Alison Astrid Uribe López.
-
 ## Tipo de aplicación y stack
 
 Aplicación web.
